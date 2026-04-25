@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi-agent-cfo-os"
+version = "0.1.0"
+description = "Multi-Agent CFO Operating System — Cognitive Mesh + Consensus Hardening Protocol for forecasts, investment cases, and board outputs."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "zan-maker"}]
+license = {text = "MIT"}
+keywords = ["ai", "agents", "cfo", "finance", "chp", "context-engineering", "multi-agent"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Financial and Insurance Industry",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+cfo-os = "cme.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cme*", "demo*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
