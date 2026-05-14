@@ -5,7 +5,7 @@ investment memos, board outputs, and audit trails. Reuses CHP models.
 """
 from __future__ import annotations
 import os, logging
-from sqlalchemy import create_engine, Column, String, Integer, Numeric, DateTime, Text, Boolean, Index, JSON, func, select, desc
+from sqlalchemy import create_engine, Column, String, Integer, Numeric, DateTime, Text, Boolean, Index, JSON, ForeignKey, func, select, desc
 from sqlalchemy.orm import declarative_base, relationship, Session, sessionmaker
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -50,7 +50,7 @@ class CFOArtifactModel(TimestampMixin, Base):
     """CFO-grade output artifacts."""
     __tablename__ = "cfo_artifacts"
     artifact_id = Column(String, primary_key=True, server_default=func.gen_random_uuid())
-    brief_id = Column(String, nullable=False, index=True)
+    brief_id = Column(String, ForeignKey("cfo_briefs.brief_id", ondelete="CASCADE"), nullable=False, index=True)
     artifact_type = Column(String, nullable=False)  # forecast_pack, investment_case_memo, board_output
     title = Column(String, nullable=False)
     lock_state = Column(String, default="")
@@ -63,7 +63,7 @@ class CFOAuditModel(TimestampMixin, Base):
     """Per-claim audit trail entries."""
     __tablename__ = "cfo_audit"
     audit_id = Column(String, primary_key=True, server_default=func.gen_random_uuid())
-    brief_id = Column(String, nullable=False, index=True)
+    brief_id = Column(String, ForeignKey("cfo_briefs.brief_id", ondelete="CASCADE"), nullable=False, index=True)
     agent = Column(String, default="")
     claim = Column(Text, default="")
     expansion_label = Column(String, default="")
@@ -102,7 +102,7 @@ class DecisionCaseModel(TimestampMixin, Base):
 class RoundRecordModel(TimestampMixin, Base):
     __tablename__ = "round_records"
     round_id = Column(String, primary_key=True, server_default=func.gen_random_uuid())
-    decision_id = Column(String, nullable=False, index=True)
+    decision_id = Column(String, ForeignKey("decision_cases.decision_id", ondelete="CASCADE"), nullable=False, index=True)
     phase = Column(String, default="FOUNDATION")
     round_number = Column(Integer, default=0)
     payload_id = Column(String, default="")
@@ -117,7 +117,7 @@ class ForecastModel(TimestampMixin, Base):
     """Forecast outputs with driver-level detail."""
     __tablename__ = "forecasts"
     forecast_id = Column(String, primary_key=True, server_default=func.gen_random_uuid())
-    brief_id = Column(String, nullable=False, index=True)
+    brief_id = Column(String, ForeignKey("cfo_briefs.brief_id", ondelete="CASCADE"), nullable=False, index=True)
     company = Column(String, default="")
     horizon = Column(String, default="FY")
     base_revenue_usd = Column(Numeric(18, 2), default=0)
