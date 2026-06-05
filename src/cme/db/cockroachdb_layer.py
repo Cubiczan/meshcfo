@@ -11,8 +11,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 logger = logging.getLogger("multi_agent_cfo_os.db")
 
-COCKROACH_URL = "cockroachdb+psycopg2://cubiczan:oY-hPkgXtZjc6kGqY67Gyg@vortex-giraffe-15678.jxf.gcp-us-east1.cockroachlabs.cloud:26257/multi_agent_cfo_os?sslmode=require"
-DATABASE_URL = os.getenv("MACFO_DATABASE_URL", COCKROACH_URL)
+DATABASE_URL = os.environ.get("MACFO_DATABASE_URL", "")
 engine = create_engine(DATABASE_URL, pool_size=8, max_overflow=4, pool_timeout=30, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
 
