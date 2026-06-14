@@ -214,6 +214,18 @@ PYTHONPATH=src pytest tests/ -v
 
 ---
 
+## Integrations and Inspirations
+
+MeshCFO is part of a growing ecosystem of multi-agent systems. These complementary projects are worth exploring:
+
+- **[TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)** (86K stars) – Multi-agent financial trading framework.
+- **[openai/openai-agents-python](https://github.com/openai/openai-agents-python)** (27K stars) – OpenAI's official agent framework.
+- **[crewAIInc/crewAI](https://github.com/crewAIInc/crewAI)** (53K stars) – Role-based AI agent orchestration.
+- **[AgentOps-AI/agentops](https://github.com/AgentOps-AI/agentops)** (5.6K stars) – Agent observability and analytics.
+- **[raga-ai-hub/RagaAI-Catalyst](https://github.com/raga-ai-hub/RagaAI-Catalyst)** (16K stars) – Agent tracing and evaluation platform.
+
+---
+
 ## License
 
 MIT. See [`LICENSE`](./LICENSE).
