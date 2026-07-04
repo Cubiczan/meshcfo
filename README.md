@@ -181,7 +181,49 @@ cfo.lock(
 | **Self-Improving Playbooks** | Delta-only updates after every turn (ADD, INCREMENT, MERGE, PRUNE) |
 | **Per-Claim Audit Trail** | Every line traces to agent + grounding + CHP finding |
 | **Context Engine** | Entity/event/task graph with cosine dedup and combined scoring (semantic 50%, recency 20%, importance 20%, frequency 10%) |
+| **Signed Audit Ledger** | HMAC-SHA256, append-only, signature-chained JSONL trail of every recommendation and board narrative |
 | **SpacetimeDB** | Real-time subscriptions, live audit streams, zero DevOps |
+
+---
+
+## Signed Audit Ledger
+
+Every recommendation and board narrative MeshCFO emits is written to a
+**tamper-evident, append-only JSONL ledger** (`.meshcfo/audit.jsonl` by default),
+so the reasoning trail is defensible to an audit committee, external auditor, or
+regulator (PCAOB AS 1215 / AICPA AU-C 230 style provenance).
+
+**Scheme** (extracted from the signed-ledger family — cleanmandate,
+swarmfi-executor, glacier-edge-arm, compliance-as-code-agent — and strengthened
+with per-record signature chaining):
+
+- One JSON record per line, append-only, never rewritten.
+- Each record is signed as `HMAC-SHA256(key, canonical_json(record) + prev_sig)`,
+  where `canonical_json` is the deterministic (sorted-key) encoding of every
+  field except `sig`, and `prev_sig` is the signature of the previous line.
+- Because each line folds in the prior signature, any edit, deletion, or
+  reordering breaks the chain from the first tampered record onward.
+
+**Record shape:** `{ts, event, actor, inputs, sources, confidence?, rationale?, prev_sig, sig}`
+
+**Key:** read from `AUDIT_LEDGER_KEY` (a well-known test default is used when
+unset so the offline demo/tests run without configuration — set a real secret in
+production).
+
+```python
+from cme.audit import AuditLedger
+
+ledger = AuditLedger("audit.jsonl")            # key from AUDIT_LEDGER_KEY
+sig = ledger.append(
+    event="recommendation", actor="finance",
+    inputs={"problem": "invest?"}, sources=["actuals"],
+    confidence="high", rationale="Do X",
+)
+intact, first_tampered_index = ledger.verify()  # (True, None) when clean
+```
+
+The ledger is wired into `EnterpriseOrchestrator` and `CFOOperatingSystem` — no
+extra code is required; running a session signs every turn automatically.
 
 ---
 
@@ -196,6 +238,7 @@ meshcfo/
 │   │   ├── protocol.py         # Cognitive Mesh Protocol
 │   │   ├── context.py          # ContextEngine
 │   │   ├── playbook.py         # Playbook + Reflector + Curator
+│   │   ├── audit/              # Signed, append-only HMAC-SHA256 audit ledger
 │   │   ├── chp/                # Consensus Hardening Protocol
 │   │   ├── cfo_os/             # CFOOperatingSystem capstone
 │   │   └── db/                 # SpacetimeDB persistence

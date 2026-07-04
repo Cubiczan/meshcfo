@@ -10,6 +10,7 @@ build/
 dist/
 *.egg
 .chp_registry.json
+.meshcfo/
 .coverage
 htmlcov/
 .mypy_cache/

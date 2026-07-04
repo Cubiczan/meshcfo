@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from cme.agent import MeshAgent, TurnResult
+from cme.audit import AuditLedger
 from cme.bridge import EntryPoint
 from cme.chp.foundation import foundation_verdict, validate_foundation_pair
 from cme.chp.gates import evaluate_r0_gate
@@ -107,6 +108,7 @@ class CFOOperatingSystem:
         registry: Optional[DecisionRegistry] = None,
         context: Optional[ContextEngine] = None,
         company_name: str = "Aperture Corp",
+        ledger: Optional[AuditLedger] = None,
     ) -> None:
         if not agents:
             raise ValueError("CFOOperatingSystem requires at least one MeshAgent")
@@ -114,8 +116,12 @@ class CFOOperatingSystem:
         self.registry = registry or DecisionRegistry()
         self.context = context or ContextEngine()
         self.company_name = company_name
+        # One signed ledger for the whole session (mesh turns + final artifact).
+        self.ledger = ledger if ledger is not None else AuditLedger()
         self._chp = CHPOrchestrator(registry=self.registry, context=self.context)
-        self._mesh = EnterpriseOrchestrator(agents=self.agents, context=self.context)
+        self._mesh = EnterpriseOrchestrator(
+            agents=self.agents, context=self.context, ledger=self.ledger
+        )
 
     # --- Public API ------------------------------------------------------
 
@@ -143,6 +149,19 @@ class CFOOperatingSystem:
             case=chp_report.case,
             disclosure=disclosure,
             attack=attack,
+        )
+
+        # Sign the top-level board-ready artifact into the tamper-evident ledger.
+        self.ledger.append(
+            event=f"cfo_artifact:{brief.task_type.value}",
+            actor="cfo_os",
+            inputs={"decision_id": chp_report.case.decision_id,
+                    "title": brief.title, "company": brief.company,
+                    "task_type": brief.task_type.value},
+            sources=[e.grounding_source for e in audit.entries],
+            confidence=chp_report.foundation_verdict.value,
+            rationale=f"lock_state={chp_report.case.status.value}; "
+            f"foundation_score={chp_report.case.foundation_score}",
         )
 
         return CFOSessionReport(

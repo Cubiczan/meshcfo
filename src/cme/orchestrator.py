@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from cme.agent import MeshAgent, TurnResult
+from cme.audit import AuditLedger
 from cme.bridge import (
     BridgeFramework,
     Consequences,
@@ -71,10 +72,14 @@ class EnterpriseOrchestrator:
         agents: List[MeshAgent],
         context: Optional[ContextEngine] = None,
         bridge: Optional[BridgeFramework] = None,
+        ledger: Optional[AuditLedger] = None,
     ) -> None:
         self.agents = {a.name: a for a in agents}
         self.context = context or ContextEngine()
         self.bridge = bridge or BridgeFramework()
+        # Signed, append-only audit ledger. Defaults to an env-keyed ledger so
+        # every recommendation/board narrative is written tamper-evidently.
+        self.ledger = ledger if ledger is not None else AuditLedger()
 
     # --- Sequencing ------------------------------------------------------
 
@@ -140,6 +145,8 @@ class EnterpriseOrchestrator:
                     "outputs": agent.capability.produces,
                 }
             )
+            # Sign each agent recommendation into the tamper-evident ledger.
+            self._audit_turn(problem, agent, result)
 
         # --- Build statement from the collected turns ----------------------
         statement = self._synthesize_statement(
@@ -150,6 +157,8 @@ class EnterpriseOrchestrator:
             statement=statement,
             agent_outputs=agent_outputs_for_bridge,
         )
+        # Sign the final synthesized workflow narrative.
+        self._audit_workflow(problem, workflow, turns)
 
         duration_ms = int((time.time() - start) * 1000)
         return OrchestrationReport(
@@ -158,6 +167,42 @@ class EnterpriseOrchestrator:
             workflow=workflow,
             duration_ms=duration_ms,
             context_snapshot=self.context.dump(),
+        )
+
+    # --- Signed audit ledger --------------------------------------------
+
+    def _audit_turn(self, problem: str, agent: MeshAgent, result: TurnResult) -> None:
+        """Write one agent's recommendation to the signed ledger."""
+        trace = result.trace
+        sources = [
+            {"claim": g.claim, "source": g.source, "confidence": g.confidence.value,
+             "risk_flag": g.risk_flag}
+            for g in trace.grounding
+        ]
+        self.ledger.append(
+            event="recommendation",
+            actor=agent.name,
+            inputs={"problem": problem, "domain": agent.capability.domain,
+                    "consumes": agent.capability.consumes},
+            sources=sources,
+            confidence=trace.confidence.value,
+            rationale=trace.recommendation,
+        )
+
+    def _audit_workflow(
+        self, problem: str, workflow: Workflow, turns: List[TurnResult]
+    ) -> None:
+        """Write the final synthesized board narrative to the signed ledger."""
+        self.ledger.append(
+            event="board_narrative",
+            actor="orchestrator",
+            inputs={"problem": problem,
+                    "agents": [t.agent for t in turns]},
+            sources=[t.agent for t in turns],
+            confidence=None,
+            rationale=workflow.statement.root_cause
+            if hasattr(workflow, "statement") and workflow.statement
+            else workflow.title,
         )
 
     # --- Statement synthesis --------------------------------------------
