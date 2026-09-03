@@ -17,3 +17,4 @@ htmlcov/
 .ruff_cache/
 node_modules/
 spacetime/spacetimedb/target/
+rust/target/
