@@ -8,9 +8,12 @@ version = "0.1.0"
 description = "Multi-Agent CFO Operating System — Cognitive Mesh + Consensus Hardening Protocol for forecasts, investment cases, and board outputs."
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{name = "zan-maker"}]
+authors = [
+  {name = "Sam Desigan", email = "sam@cubiczan.com"},
+  {name = "Cubiczan"},
+]
 license = {text = "MIT"}
-keywords = ["ai", "agents", "cfo", "finance", "chp", "context-engineering", "multi-agent"]
+keywords = ["ai", "agents", "cfo", "finance", "chp", "mcp", "meshcfo", "context-engineering", "multi-agent"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -25,15 +28,21 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "mcp>=1.12"]
+mcp = ["mcp>=1.12"]
 governance = ["egisai>=0.1.0"]
 observability = ["agentops>=0.3.0"]
 openai-agents = ["openai-agents>=0.1.0"]
 crewai = ["crewai>=0.100"]
-all = ["egisai>=0.1.0", "agentops>=0.3.0", "pytest>=8.0", "openai-agents>=0.1.0", "crewai>=0.100"]
+all = ["egisai>=0.1.0", "agentops>=0.3.0", "pytest>=8.0", "mcp>=1.12", "openai-agents>=0.1.0", "crewai>=0.100"]
+
+[project.urls]
+Homepage = "https://github.com/Cubiczan/meshcfo"
+Repository = "https://github.com/Cubiczan/meshcfo"
 
 [project.scripts]
 cfo-os = "cme.cli:main"
+meshcfo-mcp = "cme.mcp:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

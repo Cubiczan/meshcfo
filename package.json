@@ -1,0 +1,47 @@
+{
+  "name": "@cubiczan/meshcfo-mcp",
+  "version": "0.1.0",
+  "description": "Stdio MCP pipe for Cubiczan MeshCFO — forecast, investment case, board output, CHP lock, and HMAC audit verify. Spawns the Python server (pip install -e .[mcp]).",
+  "mcpName": "io.github.cubiczan/meshcfo-mcp",
+  "type": "module",
+  "bin": {
+    "meshcfo-mcp": "./bin/meshcfo-mcp.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node bin/meshcfo-mcp.js",
+    "test": "node --test mcp/wrapper.test.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mcp-server",
+    "meshcfo",
+    "cfo",
+    "chp",
+    "audit-trail",
+    "claude",
+    "cursor",
+    "cubiczan"
+  ],
+  "author": "Sam Desigan <sam@cubiczan.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cubiczan/meshcfo.git"
+  },
+  "homepage": "https://github.com/Cubiczan/meshcfo#readme",
+  "bugs": {
+    "url": "https://github.com/Cubiczan/meshcfo/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

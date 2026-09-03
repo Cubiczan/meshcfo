@@ -130,6 +130,87 @@ cfo.lock(
 
 ---
 
+## MCP (Cursor / Claude Code)
+
+**CHP is the lock; MCP is the pipe.** This repo wraps the existing
+`CFOOperatingSystem` / `cfo-os` CLI as a stdio MCP so an agent can call MeshCFO
+without vendoring the orchestrator.
+
+Same pattern as [`@cubiczan/chp-mcp`](https://www.npmjs.com/package/@cubiczan/chp-mcp),
+[`@cubiczan/agent-conductor`](https://www.npmjs.com/package/@cubiczan/agent-conductor),
+and [`@cubiczan/codesentinel-mcp`](https://www.npmjs.com/package/@cubiczan/codesentinel-mcp).
+
+MeshCFO is Python and **not on PyPI yet**. Install the package once, then point
+the host at the entrypoint (or the npm wrapper, which honestly spawns that
+same Python server):
+
+```bash
+git clone https://github.com/Cubiczan/meshcfo.git
+cd meshcfo
+pip install -e ".[mcp]"
+```
+
+Default demo agents run **offline with no API key**. Set `AUDIT_LEDGER_KEY` in
+production; a well-known test default is used when unset.
+
+### Cursor / Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "meshcfo": {
+      "command": "npx",
+      "args": ["-y", "@cubiczan/meshcfo-mcp"]
+    }
+  }
+}
+```
+
+The npm wrapper (`npx -y @cubiczan/meshcfo-mcp`) execs `python3 -m cme.mcp`.
+Until `@cubiczan/meshcfo-mcp` is published, use the Python command after
+`pip install -e ".[mcp]"`:
+
+```json
+{
+  "mcpServers": {
+    "meshcfo": {
+      "command": "meshcfo-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+Or: `"command": "python3", "args": ["-m", "cme.mcp"]`. Override the interpreter
+with `MESHCFO_PYTHON` if needed.
+
+### Claude Code
+
+```bash
+claude mcp add meshcfo -- npx -y @cubiczan/meshcfo-mcp
+```
+
+Local checkout (no npm publish required):
+
+```bash
+claude mcp add meshcfo -- meshcfo-mcp
+```
+
+### Tools
+
+| Tool | Maps to | Purpose |
+|------|---------|---------|
+| `forecast` | `CFOOperatingSystem.run(ForecastBrief)` | Driver-based operating plan with stress views |
+| `investment_case` | `CFOOperatingSystem.run(InvestmentBrief)` | Capital allocation memo |
+| `board_output` | `CFOOperatingSystem.run(BoardBrief)` | Decision packet with ranked options |
+| `lock` | `CFOOperatingSystem.lock` | Third-party validation → LOCKED |
+| `verify_audit` | `AuditLedger.verify` | HMAC-SHA256 append-only chain check |
+
+Session JSON matches the CLI `--json` report (`decision_id`, `lock_state`,
+`artifact_markdown`, `audit_entries`, …).
+
+---
+
 ## Why SpacetimeDB?
 
 | Before (CockroachDB) | After (SpacetimeDB) |
@@ -234,6 +315,7 @@ meshcfo/
 ├── src/
 │   ├── cme/
 │   │   ├── cli.py              # CLI entry point
+│   │   ├── mcp/                # stdio MCP (official SDK → CFOOperatingSystem)
 │   │   ├── agent.py            # MeshAgent base class
 │   │   ├── protocol.py         # Cognitive Mesh Protocol
 │   │   ├── context.py          # ContextEngine
@@ -243,6 +325,7 @@ meshcfo/
 │   │   ├── cfo_os/             # CFOOperatingSystem capstone
 │   │   └── db/                 # SpacetimeDB persistence
 │   └── demo/                   # Finance, Strategy, Compliance agents
+├── bin/meshcfo-mcp.js          # npm wrapper: spawn python -m cme.mcp
 ├── spacetime/                  # SpacetimeDB Rust module + Python client
 ├── tests/                      # pytest suite
 └── examples/                   # CLI invocations
@@ -253,9 +336,11 @@ meshcfo/
 ## Running Tests
 
 ```bash
-pip install pytest
+pip install pytest 'mcp>=1.12'
 PYTHONPATH=src pytest tests/ -v
 ```
+
+MCP-only: `PYTHONPATH=src pytest tests/test_mcp.py -v`
 
 ---
 
@@ -277,6 +362,7 @@ MeshCFO is part of a growing ecosystem of multi-agent systems. These complementa
 
 | Finance | [Strata](https://github.com/Cubiczan/Strata) · [Metabocommand](https://github.com/Cubiczan/Metabocommand) · [meshcfo](https://github.com/Cubiczan/meshcfo) · [working-capital-optimizer](https://github.com/Cubiczan/working-capital-optimizer) · [cash-flow-optimizer](https://github.com/Cubiczan/cash-flow-optimizer) · [finance-cockpit](https://github.com/Cubiczan/finance-cockpit) |
 | Governance | [consensus-hardening-protocol](https://github.com/Cubiczan/consensus-hardening-protocol) · [agent-conductor](https://github.com/Cubiczan/agent-conductor) · [compliance-as-code-agent](https://github.com/Cubiczan/compliance-as-code-agent) · [cleanmandate](https://github.com/Cubiczan/cleanmandate) |
+| MCP | [`@cubiczan/chp-mcp`](https://www.npmjs.com/package/@cubiczan/chp-mcp) · [`@cubiczan/agent-conductor`](https://www.npmjs.com/package/@cubiczan/agent-conductor) · [`@cubiczan/codesentinel-mcp`](https://www.npmjs.com/package/@cubiczan/codesentinel-mcp) · **`@cubiczan/meshcfo-mcp`** |
 
 MeshCFO wraps every CFO session in **CHP** — pair with [Strata](https://github.com/Cubiczan/Strata) for maturity roadmaps and [Metabocommand](https://github.com/Cubiczan/Metabocommand) for operational approval queues.
 

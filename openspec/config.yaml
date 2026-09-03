@@ -1,0 +1,4 @@
+schema: spec-driven
+context: |
+  MeshCFO is Cubiczan's auditable multi-agent CFO. CHP is the lock; MCP is the pipe.
+  Founder: Sam Desigan <sam@cubiczan.com>. Brand spelling is Cubiczan (never CubicZan).

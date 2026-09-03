@@ -288,30 +288,7 @@ def _cmd_cfo_os(args: argparse.Namespace) -> int:
     registry.save(_registry_path(args))
 
     if args.json:
-        out = {
-            "task": task.value,
-            "decision_id": report.case.decision_id,
-            "lock_state": report.case.status.value,
-            "foundation_score": report.case.foundation_score,
-            "r0_verdict": report.r0_verdict.value,
-            "foundation_verdict": report.foundation_verdict.value,
-            "artifact_markdown": report.artifact.render(),
-            "audit_entries": [
-                {
-                    "agent": e.agent,
-                    "claim": e.claim,
-                    "expansion_label": e.expansion_label,
-                    "grounding_source": e.grounding_source,
-                    "grounding_confidence": e.grounding_confidence,
-                    "risk_flag": e.risk_flag,
-                }
-                for e in report.audit.entries
-            ],
-            "foundation_findings": report.audit.foundation_findings,
-            "case": report.case.to_dict(),
-            "initial_packet": report.initial_packet,
-        }
-        sys.stdout.write(json.dumps(out, indent=2) + "\n")
+        sys.stdout.write(json.dumps(report.to_dict(), indent=2) + "\n")
     else:
         sys.stdout.write(report.render() + "\n")
 

@@ -73,6 +73,32 @@ class CFOSessionReport:
     audit: AuditTrail
     turns: List[TurnResult] = field(default_factory=list)
 
+    def to_dict(self) -> dict:
+        """CLI ``--json`` / MCP tool payload — same keys, no new protocol."""
+        return {
+            "task": self.brief.task_type.value,
+            "decision_id": self.case.decision_id,
+            "lock_state": self.case.status.value,
+            "foundation_score": self.case.foundation_score,
+            "r0_verdict": self.r0_verdict.value,
+            "foundation_verdict": self.foundation_verdict.value,
+            "artifact_markdown": self.artifact.render(),
+            "audit_entries": [
+                {
+                    "agent": e.agent,
+                    "claim": e.claim,
+                    "expansion_label": e.expansion_label,
+                    "grounding_source": e.grounding_source,
+                    "grounding_confidence": e.grounding_confidence,
+                    "risk_flag": e.risk_flag,
+                }
+                for e in self.audit.entries
+            ],
+            "foundation_findings": self.audit.foundation_findings,
+            "case": self.case.to_dict(),
+            "initial_packet": self.initial_packet,
+        }
+
     def render(self) -> str:
         sections = [
             "# CFO OS Session",
