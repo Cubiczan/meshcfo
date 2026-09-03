@@ -16,6 +16,7 @@ from cme.cfo_os import (
     ForecastBrief,
     InvestmentBrief,
 )
+from cme.mcp import main as _mcp_main
 from cme.chp import CHPOrchestrator, DecisionRegistry, Phase, ThirdPartyValidation, ValidationResult
 from cme.context import ContextEngine, Entity, Task
 from cme.finance import CapitalAllocationInput, build_capital_allocation_case
@@ -322,6 +323,11 @@ def _cmd_cfo_os(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_mcp(args: argparse.Namespace) -> int:
+    _mcp_main(["--registry", args.registry])
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="cfo-os",
@@ -430,6 +436,10 @@ def build_parser() -> argparse.ArgumentParser:
     cfo.add_argument("--out-md", default=None)
     cfo.add_argument("--json", action="store_true")
     cfo.set_defaults(func=_cmd_cfo_os)
+
+    mcp = sub.add_parser("mcp", help="Run the stdio MCP server for MeshCFO.")
+    mcp.add_argument("--registry", default=".chp_registry.json")
+    mcp.set_defaults(func=_cmd_mcp)
 
     return p
 
