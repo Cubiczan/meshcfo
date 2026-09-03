@@ -16,6 +16,7 @@ from cme.cfo_os.briefs import (
     ForecastBrief,
     InvestmentBrief,
 )
+from cme.rust_core import score_foundation
 
 
 def build_decision_case(
@@ -326,39 +327,40 @@ def _build_board_case(
 
 
 def _forecast_foundation_score(brief: ForecastBrief) -> int:
-    score = 78
-    if brief.current_runway_months < brief.minimum_runway_months + 3:
-        score -= 10
-    if brief.growth_assumption_pct > 0.40:
-        score -= 6
-    if brief.churn_assumption_pct > 0.12:
-        score -= 5
-    if not brief.revenue_drivers:
-        score -= 6
-    return max(55, min(92, score))
+    return score_foundation(
+        {
+            "kind": "forecast",
+            "current_runway_months": brief.current_runway_months,
+            "minimum_runway_months": brief.minimum_runway_months,
+            "growth_assumption_pct": brief.growth_assumption_pct,
+            "churn_assumption_pct": brief.churn_assumption_pct,
+            "revenue_drivers_count": len(brief.revenue_drivers),
+        }
+    )
 
 
 def _investment_foundation_score(brief: InvestmentBrief) -> int:
-    score = 78
-    if brief.current_runway_months < brief.minimum_runway_months + 3:
-        score -= 10
-    if brief.expected_payback_months > 18:
-        score -= 8
-    if len(brief.key_risks) >= 4:
-        score -= 4
-    if brief.investment_amount_usd >= 5_000_000:
-        score -= 3
-    return max(55, min(92, score))
+    return score_foundation(
+        {
+            "kind": "investment",
+            "current_runway_months": brief.current_runway_months,
+            "minimum_runway_months": brief.minimum_runway_months,
+            "expected_payback_months": brief.expected_payback_months,
+            "key_risks_count": len(brief.key_risks),
+            "investment_amount_usd": brief.investment_amount_usd,
+        }
+    )
 
 
 def _board_foundation_score(brief: BoardBrief, options: list[str]) -> int:
-    score = 76
-    if len(options) < 3:
-        score -= 8
-    if not brief.open_questions:
-        score -= 4
-    if not brief.strategic_risks:
-        score -= 4
-    if brief.recommended_option_index < 0 or brief.recommended_option_index >= len(options):
-        score -= 6
-    return max(55, min(92, score))
+    return score_foundation(
+        {
+            "kind": "board",
+            "options_count": len(options),
+            "open_questions_count": len(brief.open_questions),
+            "strategic_risks_count": len(brief.strategic_risks),
+            "recommended_option_index": brief.recommended_option_index,
+            "current_runway_months": 0,
+            "minimum_runway_months": 0,
+        }
+    )

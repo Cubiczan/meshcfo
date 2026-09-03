@@ -22,6 +22,8 @@ from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Iterable, List, Optional
 
+from cme.rust_core import select_context
+
 
 # --- Schema ---------------------------------------------------------------
 
@@ -192,35 +194,22 @@ class ContextEngine:
         """
         with self._lock:
             self._promote_short_to_long()
-            q_tokens = Counter(_tokens(query))
             pool: List[ContextEntry] = list(self._short_term.values()) + list(
                 self._long_term.values()
             )
             now = time.time()
-            scored: List[tuple[float, ContextEntry]] = []
-            seen_counters: List[Counter] = []
-            for entry in pool:
-                e_tokens = Counter(_tokens(entry.content))
-                # Semantic dedupe
-                if any(_cosine(e_tokens, c) > 0.85 for c in seen_counters):
-                    continue
-                semantic = _cosine(q_tokens, e_tokens)
-                age = now - entry.timestamp
-                recency = math.exp(-age / (self.short_term_ttl * 2))
-                freq = math.log1p(entry.access_count) / 5.0
-                score = (
-                    0.5 * semantic
-                    + 0.2 * recency
-                    + 0.1 * freq
-                    + 0.2 * entry.importance
-                )
-                if agent and entry.source_agent == agent:
-                    score += 0.05
-                scored.append((score, entry))
-                seen_counters.append(e_tokens)
-
-            scored.sort(key=lambda x: x[0], reverse=True)
-            top = [e for _, e in scored[:k]]
+            selected_ids = select_context(
+                {
+                    "query": query,
+                    "k": k,
+                    "agent": agent,
+                    "short_term_ttl": self.short_term_ttl,
+                    "now": now,
+                    "entries": [asdict(entry) for entry in pool],
+                }
+            )
+            by_id = {entry.id: entry for entry in pool}
+            top = [by_id[eid] for eid in selected_ids if eid in by_id]
             for e in top:
                 e.access_count += 1
             return top

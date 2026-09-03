@@ -78,6 +78,7 @@ def test_context_engine_selects_relevant():
     ctx.write("sky is blue", source_agent="weather", importance=0.2)
     hits = ctx.select("what is our fiscal year budget?", k=2)
     assert any("budget" in e.content for e in hits)
+    assert hits[0].access_count == 1
 
 
 def test_bridge_builds_statement_with_completeness():

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import hashlib
+import hmac
 import sys
 from pathlib import Path
 
@@ -122,7 +124,14 @@ def test_signature_matches_manual_computation(tmp_path):
     led = _ledger(tmp_path, key="k")
     led.append(event="e", actor="a", inputs={"x": 1}, sources=["s"], ts="2026-01-01T00:00:00+00:00")
     rec = led.read_all()[0]
-    manual = compute_sig("k", rec, "")
+    canonical = json.dumps(
+        {k: v for k, v in rec.items() if k != "sig"},
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
+    manual = hmac.new(b"k", (canonical + "").encode("utf-8"), hashlib.sha256).hexdigest()
+    assert compute_sig("k", rec, "") == manual
     assert rec["sig"] == manual
 
 

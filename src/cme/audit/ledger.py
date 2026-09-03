@@ -37,6 +37,8 @@ from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, List, Optional, Tuple
 
+from cme.rust_core import compute_sig as compute_sig_from_rust, verify_audit_chain
+
 # Env var that holds the signing key; TEST_DEFAULT keeps the offline demo/tests
 # runnable without configuration. Override AUDIT_LEDGER_KEY in production.
 KEY_ENV_VAR = "AUDIT_LEDGER_KEY"
@@ -59,8 +61,7 @@ def canonical_json(record: Dict[str, Any]) -> str:
 
 def compute_sig(key: str, record: Dict[str, Any], prev_sig: str) -> str:
     """``HMAC-SHA256(key, canonical_json(record) + prev_sig)`` as hex."""
-    message = (canonical_json(record) + prev_sig).encode("utf-8")
-    return hmac.new(key.encode("utf-8"), message, hashlib.sha256).hexdigest()
+    return compute_sig_from_rust(key, record, prev_sig)
 
 
 def default_ledger_path(root: Path | str = ".") -> Path:
@@ -167,19 +168,8 @@ class AuditLedger:
         except (json.JSONDecodeError, OSError):
             return False, 0
 
-        expected_prev = GENESIS_PREV_SIG
-        for i, rec in enumerate(records):
-            stored_sig = rec.get("sig", "")
-            stored_prev = rec.get("prev_sig", "")
-            # Chain link: this record must point at the prior record's signature.
-            if stored_prev != expected_prev:
-                return False, i
-            # Content integrity: recompute the signature over the record body.
-            recomputed = compute_sig(self.key, rec, stored_prev)
-            if not hmac.compare_digest(recomputed, stored_sig):
-                return False, i
-            expected_prev = stored_sig
-        return True, None
+        result = verify_audit_chain({"key": self.key, "records": records})
+        return bool(result["intact"]), result["first_bad"]
 
     # ------------------------------------------------------------------
     # Internals

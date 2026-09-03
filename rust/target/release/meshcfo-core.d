@@ -1,0 +1,1 @@
+/Users/cubiczan/Documents/Default\ Project/repos/meshcfo/rust/target/release/meshcfo-core: /Users/cubiczan/Documents/Default\ Project/repos/meshcfo/rust/src/bin/meshcfo-core.rs /Users/cubiczan/Documents/Default\ Project/repos/meshcfo/rust/src/lib.rs
