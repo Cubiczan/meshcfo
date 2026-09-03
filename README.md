@@ -70,7 +70,7 @@ brief → DecisionCase + CHP foundation disclosure + attack
 ```bash
 git clone https://github.com/Cubiczan/meshcfo.git
 cd meshcfo
-pip install -e .
+ pip install meshcfo
 
 # Run an investment case
 cfo-os cfo-os --task investment_case \

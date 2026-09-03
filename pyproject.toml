@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "multi-agent-cfo-os"
+name = "meshcfo"
 version = "0.1.0"
 description = "Multi-Agent CFO Operating System — Cognitive Mesh + Consensus Hardening Protocol for forecasts, investment cases, and board outputs."
 readme = "README.md"
@@ -34,6 +34,12 @@ all = ["egisai>=0.1.0", "agentops>=0.3.0", "pytest>=8.0", "openai-agents>=0.1.0"
 
 [project.scripts]
 cfo-os = "cme.cli:main"
+meshcfo = "cme.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Cubiczan/meshcfo"
+Repository = "https://github.com/Cubiczan/meshcfo"
+Issues = "https://github.com/Cubiczan/meshcfo/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
