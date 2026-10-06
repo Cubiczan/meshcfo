@@ -17,7 +17,7 @@ from cme.cfo_os import (
     InvestmentBrief,
 )
 from cme.mcp import main as _mcp_main
-from cme.chp import CHPOrchestrator, DecisionRegistry, Phase, ThirdPartyValidation, ValidationResult
+from chp import CHPOrchestrator, DecisionRegistry, Phase, ThirdPartyValidation, ValidationResult
 from cme.context import ContextEngine, Entity, Task
 from cme.finance import CapitalAllocationInput, build_capital_allocation_case
 from cme.hardening import ChpGateSettings, ChpRejection, DecisionLedger

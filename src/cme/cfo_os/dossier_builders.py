@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Tuple
 
-from cme.chp.models import DecisionCase, Dossier, FoundationAttack, FoundationDisclosure
+from chp.models import DecisionCase, Dossier, FoundationAttack, FoundationDisclosure
 from cme.cfo_os.briefs import (
     BoardBrief,
     CFOBrief,

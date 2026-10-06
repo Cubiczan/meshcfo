@@ -36,8 +36,8 @@ Four hardening stages wrap ``CFOOperatingSystem.run``:
    tampered record reads as ``integrity_valid: false``.
 
 The session protocol itself (foundation disclosure, devil's-advocate rounds,
-registry) remains meshcfo's vendored ``cme.chp``; this gate hardens the
-decision points on top of it using the canonical ``chp`` distribution.
+registry) comes from the published ``consensus-hardening-protocol`` package
+(``import chp``), as does this gate. meshcfo no longer carries a vendored copy.
 """
 from __future__ import annotations
 
@@ -80,7 +80,7 @@ _BOUNDED_RESULT_POINTS = 30
 _PARITY_POINTS = 30
 _FULL_SCORE = _GUARDRAIL_POINTS + _BOUNDED_RESULT_POINTS + _PARITY_POINTS
 
-# meshcfo task types -> canonical CHP floor-100 domains. The vendored session
+# meshcfo task types -> canonical CHP floor-100 domains. The preliminary session
 # calls the forecast domain "forecast"; the gate renames it to CHP's
 # "finance" so the floor map applies exactly (unlisted domains would fall
 # back to the general floor of 70).
@@ -606,7 +606,7 @@ class ChpDecisionGate:
 
 
 def vendored_domain(brief: Any) -> str:
-    """The vendored session domain for a brief (before canonical renaming).
+    """The preliminary session domain for a brief (before canonical renaming).
 
     Mirrors ``cme.cfo_os.dossier_builders._domain_for`` without importing it.
     """

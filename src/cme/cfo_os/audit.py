@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import Iterable, List
 
 from cme.agent import TurnResult
-from cme.chp.models import DecisionCase, FoundationAttack, FoundationDisclosure
+from chp.models import DecisionCase, FoundationAttack, FoundationDisclosure
 from cme.protocol import ExpansionStep, GroundingCheck
 
 
