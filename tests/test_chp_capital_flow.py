@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from cme.chp import CHPOrchestrator  # noqa: E402
+from chp import CHPOrchestrator  # noqa: E402
 from cme.finance import CapitalAllocationInput, build_capital_allocation_case  # noqa: E402
 
 
@@ -36,5 +36,10 @@ def test_capital_allocation_builder_and_orchestrator():
     assert report.case.context_check is not None
     assert report.case.model_parity is not None
     assert report.case.foundation_score == attack.foundation_score
-    assert "BEGIN_PAYLOAD" in report.initial_packet
-    assert report.case.status.value in {"EXPLORING", "REFRAME_REQUIRED", "HALT"}
+    # Spec §5.3: capital_allocation gates at foundation score 100. The builder's
+    # heuristic score (capped at 92) cannot self-certify, so the preliminary
+    # session must REFRAME and issue no packet. The authoritative score comes
+    # from the hardening gate on the produced artifact (see test_chp_hardening).
+    assert report.foundation_verdict.value == "REFRAME"
+    assert report.initial_packet == ""
+    assert report.case.status.value == "REFRAME_REQUIRED"

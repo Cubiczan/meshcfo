@@ -15,8 +15,8 @@ from typing import Any, Callable, Dict, List, Optional
 
 from cme.agent import AgentCapability, MeshAgent, TurnResult
 from cme.bridge import BridgeFramework, EntryPoint
-from cme.chp.models import DecisionCase, FoundationAttack, FoundationDisclosure, Verdict
-from cme.chp.orchestrator import CHPOrchestrator, CHPReport
+from chp.models import DecisionCase, FoundationAttack, FoundationDisclosure, Verdict
+from chp.orchestrator import CHPOrchestrator, CHPReport
 from cme.context import ContextEngine
 from cme.protocol import ConfidenceLevel
 

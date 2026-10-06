@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import List
 
-from cme.chp.models import DecisionCase, Dossier, FoundationAttack, FoundationDisclosure
+from chp.models import DecisionCase, Dossier, FoundationAttack, FoundationDisclosure
 
 
 @dataclass

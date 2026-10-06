@@ -26,9 +26,9 @@ from typing import Any, Dict, List, Optional
 from cme.agent import MeshAgent, TurnResult
 from cme.audit import AuditLedger
 from cme.bridge import EntryPoint
-from cme.chp.foundation import foundation_verdict, validate_foundation_pair
-from cme.chp.gates import evaluate_r0_gate
-from cme.chp.models import (
+from chp.foundation import foundation_verdict, validate_foundation_pair
+from chp.gates import evaluate_r0_gate
+from chp.models import (
     DecisionCase,
     FoundationAttack,
     FoundationDisclosure,
@@ -37,11 +37,11 @@ from cme.chp.models import (
     ValidationResult,
     Verdict,
 )
-from cme.chp.orchestrator import CHPOrchestrator
-from cme.chp.parity import assess_model_parity
-from cme.chp.payloads import build_payload_envelope
-from cme.chp.registry import DecisionRegistry
-from cme.chp.validators import apply_third_party_validation
+from chp.orchestrator import CHPOrchestrator
+from chp.parity import assess_model_parity
+from chp.payloads import build_payload_envelope
+from chp.registry import DecisionRegistry
+from chp.validators import apply_third_party_validation
 from cme.context import ContextEngine, Entity, Task
 from cme.hardening import ChpDecisionGate, ChpRejection
 from cme.orchestrator import EnterpriseOrchestrator, OrchestrationReport
@@ -204,6 +204,15 @@ class CFOOperatingSystem:
         if confirmed_by:
             self.gate.lock(decision, confirmed_by)
 
+        # The preliminary session above scores a builder heuristic before any agent
+        # has run, so under the spec §5.3 domain floors (100 for capital_allocation
+        # and board_decision) it can only REFRAME. The authoritative verdict is the
+        # hardening gate's, assessed on the produced artifact (and it already
+        # refused the session above if that fell short of the floor). Report that
+        # outcome on the case rather than the stale preliminary one.
+        chp_report.case.status = decision.case.status
+        chp_report.case.foundation_score = decision.case.foundation_score
+
         audit = build_audit_trail(
             turns=orchestration.turns,
             case=chp_report.case,
@@ -251,9 +260,9 @@ class CFOOperatingSystem:
             case=chp_report.case,
             foundation_disclosure=disclosure,
             foundation_attack=attack,
-            r0_verdict=chp_report.r0_verdict,
-            foundation_verdict=chp_report.foundation_verdict,
-            initial_packet=chp_report.initial_packet,
+            r0_verdict=decision.report.r0_verdict,
+            foundation_verdict=decision.report.foundation_verdict,
+            initial_packet=decision.report.initial_packet,
             orchestration=orchestration,
             artifact=artifact,
             audit=audit,

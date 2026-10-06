@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from cme.agent import TurnResult
-from cme.chp.models import DecisionCase, SessionStatus
+from chp.models import DecisionCase, SessionStatus
 from cme.cfo_os.briefs import BoardBrief, ForecastBrief, InvestmentBrief
 
 

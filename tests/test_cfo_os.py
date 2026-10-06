@@ -14,7 +14,7 @@ from cme.cfo_os import (
     InvestmentBrief,
 )
 from cme.cfo_os.artifacts import BoardOutput, ForecastPack, InvestmentCaseMemo
-from cme.chp.models import SessionStatus
+from chp.models import SessionStatus
 from demo import ComplianceAgent, FinanceAgent, StrategyAgent
 
 
@@ -44,7 +44,8 @@ def test_investment_case_runs_three_agents_and_advances_lock():
     assert isinstance(report.artifact, InvestmentCaseMemo)
     assert {t.agent for t in report.turns} == {"finance", "strategy", "compliance"}
     assert report.case.foundation_score and report.case.foundation_score >= 70
-    assert report.case.status == SessionStatus.PROVISIONAL_LOCK
+    # A named confirmer was supplied, so the hardened case is locked outright.
+    assert report.case.status == SessionStatus.LOCKED
     assert "BEGIN_PAYLOAD" in report.initial_packet
     assert report.audit.entries  # at least one provenance entry
 
@@ -87,7 +88,10 @@ def test_board_brief_produces_board_output_with_options():
     assert "Open Questions" in rendered
 
 
-def test_lock_progression_via_third_party_validation():
+def test_lock_progression_via_third_party_validation(monkeypatch):
+    # Two-step flow: with the human-lock flag off an unconfirmed session holds at
+    # PROVISIONAL_LOCK and locks only through third-party validation.
+    monkeypatch.setenv("MESH_CFO_CHP_REQUIRE_HUMAN_LOCK", "0")
     cfo = _cfo_os()
     brief = InvestmentBrief(
         title="Fund enterprise tier Q3",
@@ -98,7 +102,7 @@ def test_lock_progression_via_third_party_validation():
         minimum_runway_months=12,
         current_runway_months=18,
     )
-    report = cfo.run(brief, confirmed_by="finance-lead")
+    report = cfo.run(brief, confirmed_by=None)
     assert report.case.status == SessionStatus.PROVISIONAL_LOCK
 
     case = cfo.lock(

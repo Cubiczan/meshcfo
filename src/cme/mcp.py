@@ -10,7 +10,7 @@ from typing import Any, Callable
 
 from cme.audit import AuditLedger
 from cme.cfo_os import BoardBrief, CFOOperatingSystem, ForecastBrief, InvestmentBrief
-from cme.chp import DecisionRegistry
+from chp import DecisionRegistry
 from cme.context import ContextEngine
 from cme.hardening import ChpGateSettings, DecisionLedger
 

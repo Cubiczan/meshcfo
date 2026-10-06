@@ -22,7 +22,7 @@ from cme.hardening import (
     ChpRejection,
     DecisionLedger,
 )
-from cme.chp.models import SessionStatus
+from chp.models import SessionStatus
 from demo import ComplianceAgent, FinanceAgent, StrategyAgent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

@@ -14,8 +14,8 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from cme.agent import MeshAgent, TurnResult
-from cme.chp.models import DecisionCase, FoundationAttack, FoundationDisclosure, Verdict
-from cme.chp.orchestrator import CHPOrchestrator, CHPReport
+from chp.models import DecisionCase, FoundationAttack, FoundationDisclosure, Verdict
+from chp.orchestrator import CHPOrchestrator, CHPReport
 from cme.context import ContextEngine
 from cme.protocol import ConfidenceLevel
 
